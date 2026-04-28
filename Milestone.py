@@ -1,25 +1,18 @@
 import csv
+from Milestone2 import LinkedQueue, EnrollmentRecord, binary_search_helper
+from datetime import date
 
-def course_data_to_dict(filename):
-    """
-    Created by Ryan.
-
-    Reads a CSV file containing course data and returns
-    a dictionary with course_code and credits
-    """
-    course_dict = {}
-    with open(filename, "r", newline = '') as csv_file:
-        my_reader = csv.reader(csv_file)
-        next(my_reader)
+def load_courses(filename, university):
+    with open(filename, "r", newline= '') as csv_file:
+        my_reader = csv.DictReader(csv_file)
         for row in my_reader:
-            course_code = str(row[0])
-            credits = int(row[1])
-            course_dict[course_code] = credits
-        return course_dict
-    
+            course_id = row["course_id"]
+            credits = int(row["credits"])
+            capacity = int(row["capacity"])
+            university.add_course(course_id, credits, capacity)
+            
 def university_data_to_dict(filename):
     # This was created by ryan and it reads the csv file, creates, stores, and returns the dict with the information included
-
     """
     Created by Ryan.
 
@@ -46,14 +39,6 @@ def university_data_to_dict(filename):
         }
     return university_dict
 
-course_data = course_data_to_dict('course_catalog.csv')
-university_data = university_data_to_dict('university_data.csv')
-#print(university_data["STU00001"]) # -> is formatted like this 
-                                    #      'name': Student_1
-                                    #      'courses': {
-                                    #      'Math2010': 'C+ 
-                                    #       }
-
 class Courses: 
     """
     By: Ryan
@@ -61,31 +46,86 @@ class Courses:
     This represents a university course. It stores the course_code,
     number of credits, and a list of enrolled Student objects.
     """
-    # students is a list of Student objects. students entrolled in the course
-    def __init__(self, course_code: str, credits: int, students: list):
+    def __init__(self, course_code: str, credits: int, capacity: int):
         """
         Initializes a Course object with course_code, credit value,
         and list of students enrolled.
         """
         self.course = course_code
         self.credits = credits
-        self.students = students
+        self.capacity = capacity
+        
+        self.enrolled = [] # list of EnrollmentRecord
+        self.waitlist = LinkedQueue() # queue of student objects
+        self.sorted_by = None
     
     # Supposed to add a Student object to the course roster    
-    def add_student(self, student):
-        if student in self.students:
-            raise ValueError("Student already in the course")
-        """
-        Adds a Student object to the course roster
-        """
-        self.students.append(student)
+    def request_enroll(self, student: "Student", enroll_date: str):
+        for record in self.enrolled:
+            if record.student.student_id == student.student_id:
+                raise ValueError("Student already enrolled")
+        
+        if len(self.enrolled) < self.capacity:
+            record = EnrollmentRecord(student, enroll_date)
+            self.enrolled.append(record)
+        else:
+            self.waitlist.enqueue(student)
+   
+    def drop(self, student_id: str, enroll_date: str = None):
+        if self.sorted_by != "id":
+           raise ValueError("Roster must be sorted by ID first")
+       
+        index = binary_search_helper(self.enrolled, student_id)
+       
+        if index == -1:
+            raise ValueError("Student not found")
+        self.enrolled.pop(index)
+        self.sorted_by = None
+        
+        if not self.waitlist.is_empty():
+            next_student = self.waitlist.dequeue()
+            if enroll_date is not None:
+                new_date = enroll_date
+            else:
+                new_date = date.today().strftime("%Y-%m-%d")
+            new_record = EnrollmentRecord(next_student, new_date)
+            self.enrolled.append(new_record)
    
    # returns the number of students currently enrolled 
     def get_student_count(self) -> int:
         """
         Returns the number of students currently enrolled in the course.
         """
-        return len(self.students)
+        return len(self.enrolled)
+    
+    def sort_enrolled(self, by, algorithm):
+        """
+        Sorts the roster by name, id, or enroll date using either insertion or selection
+        """
+        def get_val(record):
+            if by == 'id': 
+                return record.student.student_id
+            if by == 'name': 
+                return record.student.name
+            return record.enroll_date
+
+        if algorithm == 'insertion':
+            for i in range(1, len(self.enrolled)):
+                key_item = self.enrolled[i]
+                j = i - 1
+                while j >= 0 and get_val(self.enrolled[j]) > get_val(key_item):
+                    self.enrolled[j + 1] = self.enrolled[j]
+                    j -= 1
+        
+        if algorithm == 'selection':
+            for i in range(len(self.enrolled)):
+                min_idx = i
+                for j in range(i + 1, len(self.enrolled)):
+                    if get_val(self.enrolled[j]) < get_val(self.enrolled[min_idx]):
+                        min_idx = j
+                self.enrolled[i], self.enrolled[min_idx] = self.enrolled[min_idx], self.enrolled[i]
+        
+        self.sorted_by = by
     
 class Student:
     """
@@ -228,17 +268,15 @@ class University:
         #Course Object
         self.courses = {}
         
-    def add_course(self, course_code: str, credits: int) -> Courses: # Course object
+    def add_course(self, course_code: str, credits: int, capacity: int) -> Courses: # Course object
         """
         Adds a new course to the university if it does not exist.
         Returns the course object.
         """ 
         if course_code in self.courses:
             raise ValueError("Course already exists")
-        if course_code in self.courses:
-            return self.courses[course_code]
         
-        new_course = Courses(course_code, credits, [])
+        new_course = Courses(course_code, credits, capacity)
         self.courses[course_code] = new_course
         return new_course
 
