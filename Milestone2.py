@@ -142,9 +142,15 @@ class HashMapping:
     def _bucket(self, key):
         return self._buckets[hash(key) % self._size]
     
+    def items(self):
+        for bucket in self._buckets:
+            for key, value in bucket.items():
+                yield key, value
+    
     def rehashing(self):
         print("I need more space")
         old_buckets = self._buckets
+        self._length = 0
         self._size *= 2
         self._buckets = [ListMapping() for i in range(self._size)]
 
@@ -152,6 +158,8 @@ class HashMapping:
             for key, value in bucket.items():
                 m = self._bucket(key)
                 m[key] = value
+                self._length+=1
+      
         
     def __len__(self):
         return self._length
@@ -174,3 +182,97 @@ class HashMapping:
         for i in range(len(self._buckets)):
             output += f"Bucket {i}: {self._buckets[i]}\n"
         return output
+    
+# --------------- Extra functions --------------------
+    """
+    Binary Search and its helper function that calls it
+    """
+def binary_search_helper(records: list[EnrollmentRecord], target_id: str):
+    return recursive_binary_search(records, target_id, 0, len(records) - 1)
+
+def recursive_binary_search(records: list[EnrollmentRecord], target_id: str, low, high):
+    if low > high:
+        return -1
+
+    mid = (low + high) // 2
+    mid_item = records[mid].student.student_id
+    
+    if mid_item == target_id:
+        return mid
+    elif target_id < mid_item:
+        return recursive_binary_search(records, target_id, low, mid - 1)
+    else:
+        return recursive_binary_search(records, target_id, mid + 1, high)
+
+"""    
+    Merge Sort and its helper function that calls it
+"""    
+def merge_sort_helper(L: list) -> list:
+    if len(L) <= 1:
+        return L
+    
+    mid = len(L) // 2
+    
+    A = L[:mid]
+    B = L[mid:]
+    
+    merge_sort_helper(A)
+    merge_sort_helper(B)
+    
+    return merge_sort(A,B,L)
+
+def merge_sort(A,B,L):
+    i = 0
+    j = 0
+    
+    while i < len(A) and j < len(B):
+        if A[i] <= B[j]:
+            L[i+j] = A[i]
+            i+=1
+        
+        else:
+            L[i+j] = B[j]
+            j+=1
+            
+    L[i+j:] = A[i:] + B[j:]
+    return L
+
+
+"""
+    Quick sort and its helper function taht calls it
+"""
+
+def quicksort_helper(L: list):
+    return quicksort(L,0,len(L))
+
+def partition(L,i,j):
+    pivot = j - 1
+    j = pivot - 1
+    
+    while i < j:
+        while L[i] < L[pivot]:
+            i+=1
+        while i < j and L[j] >= L[pivot]:
+            j-=1
+        
+        if i < j:
+            L[i], L[j] = L[j], L[i]
+    
+    if L[i] >= L[pivot]:
+        L[pivot], L[i] = L[i], L[pivot]
+        
+        pivot = i
+    return pivot
+
+def quicksort(L,left,right):
+    if right - left <= 1:
+        return L
+    
+    pivot = partition(L,left,right)
+    
+    quicksort(L,left,pivot)
+    quicksort(L,pivot+1, right)
+    return L
+
+
+
