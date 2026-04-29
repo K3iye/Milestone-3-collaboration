@@ -183,7 +183,7 @@ class Student:
     def enroll(self, course: str, grade: str):
         """
         By: Johnny
-        Enrolls student ina  course and assigns a grade.
+        Enrolls student in a course and assigns a grade.
         """
         if grade not in self.grade_point:
             raise ValueError("Grade does not exist in grade point")
