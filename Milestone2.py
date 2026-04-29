@@ -9,26 +9,7 @@ class EnrollmentRecord:
         
     def __repr__(self):
         return f"Enrollment Record: {self.student.student_id}, {self.enroll_date}"
-    
 
-def binary_search_helper(records: list[EnrollmentRecord], target_id: str):
-    return recursive_binary_search(records, target_id, 0, len(records) - 1)
-
-def recursive_binary_search(records: list[EnrollmentRecord], target_id: str, low, high):
-    if low > high:
-        return -1
-
-    mid = (low + high) // 2
-    mid_item = records[mid].student.student_id
-    
-    if mid_item == target_id:
-        return mid
-    elif target_id < mid_item:
-        return recursive_binary_search(records, target_id, low, mid - 1)
-    else:
-        return recursive_binary_search(records, target_id, mid + 1, high)
-
-    
 """
     Linked list created by Johnny
 """
@@ -148,18 +129,14 @@ class HashMapping:
                 yield key, value
     
     def rehashing(self):
-        print("I need more space")
         old_buckets = self._buckets
-        self._length = 0
         self._size *= 2
         self._buckets = [ListMapping() for i in range(self._size)]
 
+        self._length = 0
         for bucket in old_buckets:
             for key, value in bucket.items():
-                m = self._bucket(key)
-                m[key] = value
-                self._length+=1
-      
+                self[key] = value
         
     def __len__(self):
         return self._length

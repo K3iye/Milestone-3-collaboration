@@ -133,10 +133,10 @@ class Courses:
             key = get_val(record)
             paired_list.append((key,record))
         
-        if algorithm == 'Merge':
+        if algorithm == 'merge':
             merge_sort_helper(paired_list)
         
-        if algorithm == 'Quick':
+        if algorithm == 'quick':
             quicksort_helper(paired_list)
         
         # Get the sorted records
@@ -234,8 +234,8 @@ class Student:
                 self.student_gpanum.append(self.grade_point[grade])
     
         for item in self.student_courses:
-            if item in course_data:
-                student_cred.append(course_data[item]) # gives all the credits
+            if item in self.course_data:
+                student_cred.append(self.course_data[item]) # gives all the credits
 
         self.total_cred = sum(student_cred)
         
