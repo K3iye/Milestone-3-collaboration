@@ -1,0 +1,24 @@
+Milestone 3 Time complexity Report
+
+The HashMap implemented in this project contains seperate chaining, 
+which makes it so each bucket can store multiple values in a list. 
+The average time complexity for both put and get operations is O(1) because it uses a 
+hash function to directly access a bucket.
+However, in the worst case, if many values go into the same bucket, the time complexity 
+becomes O(n) since it has to search through the list to locate the item.
+
+When the load factor reaches 0.8, the HashMap resizes and rehashes all elements
+into a new table with double the size. This rehashing process takes O(n) timme
+because every element must be moved.
+
+For sorting Merge Sort and Quick Sort were implemented. Merge sort always
+runs in O(nlogn) time because it splits the list into smaller parts and then
+merges them back together. It does require extra space to storee the merged lists.
+
+Quicksort has an average time complexity of O(nlogn), but in the worst case it can
+be O(n^2) if the pivot is chosen poorly, such as when the list is already sorted. 
+However, Quick Sort is usually faster because it does not require extra space nad works in-place.
+
+Between the 2, Merge Sort is better when you want guaranteed performance since it always
+runs in O(nlogn). Quick Sort is better for average use because it is faster and uses 
+less memory.
